@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costal Savior - NASA Space Apps</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🌊 Costal Savior</h1>
+            <div id="resources">
+                <span>💰 Presupuesto: <span id="money" class="resource-value">100</span></span>
+                <span>😊 Bienestar: <span id="wellbeing" class="resource-value">50</span></span>
+                <span>🌿 Ambiente: <span id="environment" class="resource-value">50</span></span>
+                <span>🛡️ Resiliencia: <span id="resilience" class="resource-value">20</span></span>
+                <span>📅 Año: <span id="year" class="resource-value">2025</span></span>
+            </div>
+        </header>
+
+        <main>
+            <div id="game-board">
+                <!-- Tablero generado dinámicamente -->
+            </div>
+
+            <div id="control-panel">
+                <h3>Acciones</h3>
+                <div class="action-buttons">
+                    <button onclick="buildStructure('residential')">🏠 Zona Residencial (+Bienestar, -Ambiente)</button>
+                    <button onclick="buildStructure('industrial')">🏭 Zona Industrial (+Dinero, -Ambiente)</button>
+                    <button onclick="buildStructure('mangrove')">🟢 Restaurar Manglar (+Ambiente, +Resiliencia)</button>
+                    <button onclick="buildStructure('seawall')">🛡️ Construir Dique (+Resiliencia, -Dinero)</button>
+                    <button id="consult-ai-btn">📡 Consultar IA</button>
+
+                </div>
+                
+                <div class="save-controls">
+                    <button onclick="manualSave()">💾 Guardar</button>
+                    <button onclick="manualLoad()">📂 Cargar</button>
+                    <button onclick="newGame()">🔄 Nuevo Juego</button>
+                    <button onclick="viewStats()">📊 Estadísticas</button>
+                </div>
+
+                <button id="next-turn-btn" onclick="nextTurn()">Siguiente Turno (5 años)</button>
+
+                <!-- Panel NASA -->
+                <div id="nasa-data-panel" class="nasa-data-update">
+                    <!-- Se llenará dinámicamente desde JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de eventos -->
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="event-title">Evento Climático</h2>
+            <p id="event-description"></p>
+            <button onclick="closeEventModal()">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Modal de estadísticas -->
+    <div id="stats-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>📊 Estadísticas de Partidas</h2>
+            <div id="stats-content">
+                <!-- Contenido dinámico -->
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button onclick="closeStatsModal()">Cerrar</button>
+                <button onclick="exportSave()">📤 Exportar Partida</button>
+                
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+                <button onclick="document.getElementById('import-file').click()">📥 Importar Partida</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="nasa-api.js"></script>
+    <script src="save-manager.js"></script>
+    <script src="game.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Importar partidas
+            const importFile = document.getElementById('import-file');
+            if (importFile) {
+                importFile.addEventListener('change', function(e) {
+                    if (e.target.files[0]) {
+                        importSave(e.target.files[0]);
+                    }
+                });
+            }
+
+            // Animación inicial de NASA
+            const nasaPanel = document.getElementById('nasa-data-panel');
+            if (nasaPanel) {
+                nasaPanel.classList.add('nasa-data-update');
+            }
+        });
+    </script>
+    <script>
+        const OPENAI_API_KEY = "tu_api_key_aqui"; // ⚠️ solo para pruebas locales
+    </script>
+
+
+    <!-- Modal para IA -->
+    <div id="ai-modal" class="modal hidden">
+    <div class="modal-content ai-modal">
+        <h2>Asesor de IA Climática</h2>
+        <div id="ai-response">
+        <p>La IA analizará tu estado actual del juego y los datos de NASA para recomendarte la mejor estrategia.</p>
+        </div>
+        <button onclick="closeAIModal()">Cerrar</button>
+    </div>
+</div>
+
+
+</body>
+</html>

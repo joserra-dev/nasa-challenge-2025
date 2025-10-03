@@ -1,0 +1,13 @@
+<!-- Añadir después del modal de eventos existente -->
+<div id="stats-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>📊 Estadísticas de Partidas</h2>
+        <div id="stats-content">
+            <!-- Contenido dinámico -->
+        </div>
+        <button onclick="closeStatsModal()">Cerrar</button>
+        <button onclick="exportSave()">📤 Exportar Partida</button>
+        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importSave(this.files[0])">
+        <button onclick="document.getElementById('import-file').click()">📥 Importar Partida</button>
+    </div>
+</div>

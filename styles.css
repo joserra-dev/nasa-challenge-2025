@@ -1,0 +1,325 @@
+/* === TIPOGRAFÍA GLOBAL === */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(270deg, #87CEEB, #1E90FF);
+    background-size: 400% 400%;
+    animation: oceanFlow 15s ease infinite;
+    min-height: 100vh;
+}
+
+/* Animación de fondo tipo olas */
+@keyframes oceanFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.hidden { display: none !important; }
+
+#game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* === HEADER === */
+header {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin: 0;
+    color: #2c3e50;
+    text-align: center;
+}
+
+#resources {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#resources span {
+    background: rgba(52, 73, 94, 0.9);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* === LAYOUT PRINCIPAL === */
+main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+/* === TABLERO === */
+#game-board {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    /* gap: 5px; */
+}
+
+.cell {
+    background-image: url(pexels-photo-413195.jpeg);
+    /* border: 2px solid #2ecc71;
+    border-radius: 5px; */
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7.5em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.cell:hover {
+    transform: scale(1.05);
+    border-color: #f1c40f;
+}
+
+.cell.selected {
+    border: 3px solid #e74c3c;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+    transform: scale(1.02);
+}
+
+.cell.coast {
+    background-image:url(istockphoto-1300107681-612x612.jpg);
+    border-color: #2980b9;
+}
+
+.cell.flooded {
+    background: #8e44ad;
+    border-color: #9b59b6;
+}
+
+/* Animación al construir algo */
+.cell.build {
+    animation: popIn 0.4s ease;
+}
+@keyframes popIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Tooltip */
+.cell::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 0.5em;
+    padding: 1px 3px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.cell:hover::after { opacity: 1; }
+
+/* === PANEL DE CONTROL === */
+#control-panel {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.action-buttons button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+.action-buttons button:hover {
+    background: linear-gradient(135deg, #2980b9, #1c598a);
+    transform: translateY(-2px);
+}
+
+.action-buttons button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+#next-turn-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+#next-turn-btn:hover {
+    background: linear-gradient(135deg, #d35400, #a84300);
+    transform: translateY(-2px);
+}
+#next-turn-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* === MODALES === */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* === PANEL NASA === */
+#nasa-data-panel {
+    background: linear-gradient(135deg, #0b3d91, #1a5f9e);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #f1c40f;
+}
+
+#nasa-data-panel h3 {
+    margin-top: 0;
+    color: #f1c40f;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.nasa-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.9em;
+    backdrop-filter: blur(5px);
+}
+.stat-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #f1c40f;
+}
+
+/* Estilos para controles de guardado */
+.save-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.save-controls button {
+    padding: 8px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.save-controls button:hover {
+    background: #7f8c8d;
+}
+
+.save-controls button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.modal-content.ai-modal {
+    background: linear-gradient(135deg, #1b2735, #2c3e50);
+    color: #f1f1f1;
+    border: 2px solid #00ffcc;
+    text-align: left;
+}
+
+#ai-response {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    main { grid-template-columns: 1fr; }
+    #game-board { min-height: 400px; }
+    .cell { min-height: 60px; font-size: 1.2em; }
+    #resources { flex-direction: column; align-items: center; }
+    .action-buttons button { font-size: 0.9em; padding: 10px; }
+}
+
