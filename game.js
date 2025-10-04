@@ -1,6 +1,6 @@
-// game.js - Lógica Principal del Juego
+// game.js - Main Game Logic
 
-// Estado global del juego
+// Global game state
 const gameState = {
     money: gameConfig.initialMoney,
     wellbeing: gameConfig.initialWellbeing,
@@ -17,13 +17,13 @@ const gameState = {
 // ========== INICIALIZACIÓN DEL JUEGO ==========
 
 /**
- * Inicializa el juego - función principal
+ * Initialize the game - main function
  */
 function initGame() {
-    console.log('Inicializando juego...');
+    console.log('Initializing game...');
     
     try {
-        // Intentar cargar partida guardada
+        // Try to load saved game
         const savedGame = saveManager.loadGame();
         
         if (savedGame) {
@@ -39,10 +39,10 @@ function initGame() {
         initNasaData();
         setupAutoSave();
         
-        console.log('Juego inicializado correctamente');
+        console.log('Game initialized correctly');
     } catch (error) {
-        console.error('Error inicializando el juego:', error);
-        // Fallback: crear juego nuevo
+        console.error('Error initializing game:', error);
+        // Fallback: create new game
         createBoard();
         updateUI();
         setupEventListeners();
@@ -50,12 +50,12 @@ function initGame() {
 }
 
 /**
- * Crea el tablero de juego desde cero
+ * Creates the game board from scratch
  */
 function createBoard() {
     const gameBoard = document.getElementById('game-board');
     if (!gameBoard) {
-        console.error('Elemento game-board no encontrado');
+        console.error('game-board element not found');
         return;
     }
     
@@ -70,7 +70,7 @@ function createBoard() {
             cell.dataset.row = row;
             cell.dataset.col = col;
             
-            // Definir celdas costeras (las 2 últimas filas)
+            // Define coastal cells (the last 2 rows)
             const cellType = row >= 4 ? 'coast' : 'land';
             if (cellType === 'coast') {
                 cell.classList.add('coast');
@@ -92,20 +92,20 @@ function createBoard() {
 }
 
 /**
- * Crea el tablero desde datos guardados
+ * Creates the board from saved data
  */
 function createBoardFromSave() {
     const gameBoard = document.getElementById('game-board');
     if (!gameBoard) {
-        console.error('Elemento game-board no encontrado');
+        console.error('game-board element not found');
         return;
     }
     
     gameBoard.innerHTML = '';
     
-    // Verificar que tenemos datos del tablero guardados
+    // Check that we have saved board data
     if (!gameState.board || gameState.board.length === 0) {
-        console.warn('No hay datos de tablero guardados, creando nuevo tablero');
+        console.warn('No saved board data, creating new board');
         createBoard();
         return;
     }
@@ -120,7 +120,7 @@ function createBoardFromSave() {
             const savedCell = gameState.board[row][col];
             if (!savedCell) continue;
             
-            // Restaurar tipo de celda
+            // Restore cell type
             if (savedCell.type === 'coast') {
                 cell.classList.add('coast');
                 cell.dataset.type = 'coast';
@@ -128,7 +128,7 @@ function createBoardFromSave() {
                 cell.dataset.type = 'land';
             }
             
-            // Restaurar estructura
+            // Restore structure
             if (savedCell.structure) {
                 const structure = structures[savedCell.structure];
                 if (structure) {
@@ -137,7 +137,7 @@ function createBoardFromSave() {
                 }
             }
             
-            // Restaurar estado de inundación
+            // Restore flood state
             if (savedCell.flooded) {
                 cell.classList.add('flooded');
                 if (!savedCell.structure) {
@@ -148,27 +148,27 @@ function createBoardFromSave() {
             cell.addEventListener('click', () => selectCell(row, col));
             gameBoard.appendChild(cell);
             
-            // Actualizar referencia al elemento DOM
+            // Update DOM element reference
             gameState.board[row][col].element = cell;
         }
     }
 }
 
-// ========== INTERACCIÓN DEL USUARIO ==========
+// ========== USER INTERACTION ==========
 
 /**
- * Selecciona una celda para construir
+ * Selects a cell to build on
  */
 function selectCell(row, col) {
     if (gameState.gameOver) return;
     
-    // Validar coordenadas
+    // Validate coordinates
     if (row < 0 || row >= gameState.board.length || col < 0 || col >= gameState.board[0].length) {
-        console.error('Coordenadas de celda inválidas:', row, col);
+        console.error('Invalid cell coordinates:', row, col);
         return;
     }
     
-    // Deseleccionar celda anterior
+    // Deselect previous cell
     if (gameState.selectedCell && gameState.selectedCell.element) {
         gameState.selectedCell.element.classList.remove('selected');
     }
@@ -176,106 +176,106 @@ function selectCell(row, col) {
     gameState.selectedCell = gameState.board[row][col];
     gameState.selectedCell.element.classList.add('selected');
     
-    console.log(`Celda seleccionada: (${row}, ${col}) - Tipo: ${gameState.selectedCell.type}`);
+    console.log(`Cell selected: (${row}, ${col}) - Type: ${gameState.selectedCell.type}`);
 }
 
 /**
- * Construye una estructura en la celda seleccionada
+ * Builds a structure on the selected cell
  */
 function buildStructure(structureType) {
     if (gameState.gameOver) {
-        showEventModal("Juego Terminado", "El juego ha concluido. Por favor, recarga la página para jugar de nuevo.");
+        showEventModal("Game Over", "The game has ended. Please reload the page to play again.");
         return;
     }
 
     if (!gameState.selectedCell) {
-        alert("Por favor, selecciona una celda primero.");
+        alert("Please select a cell first.");
         return;
     }
 
     const structure = structures[structureType];
     if (!structure) {
-        console.error('Estructura no encontrada:', structureType);
+        console.error('Structure not found:', structureType);
         return;
     }
 
     const cell = gameState.selectedCell;
 
-    // Verificar si ya hay una estructura
+    // Check if there is already a structure
     if (cell.structure) {
-        alert("Ya hay una estructura en esta celda.");
+        alert("There is already a structure in this cell.");
         return;
     }
 
-    // Verificar costo
+    // Check cost
     if (gameState.money < structure.cost) {
-        alert("No tienes suficiente dinero.");
+        alert("You don't have enough money.");
         return;
     }
 
-    // Verificar restricciones de construcción usando la función canBuild si existe
+    // Check construction restrictions using canBuild function if it exists
     if (structure.canBuild && !structure.canBuild(cell)) {
-        alert(`No se puede construir ${structure.name} en este tipo de celda.`);
+        alert(`Cannot build ${structure.name} on this type of cell.`);
         return;
     }
 
-    // Verificar restricciones de construcción manuales (fallback)
+    // Check manual construction restrictions (fallback)
     if (structureType === 'mangrove' && cell.type !== 'coast') {
-        alert("Los manglares solo se pueden construir en zonas costeras.");
+        alert("Mangroves can only be built in coastal areas.");
         return;
     }
 
     if (structureType === 'seawall' && cell.type !== 'coast') {
-        alert("Los diques solo se pueden construir en zonas costeras.");
+        alert("Seawalls can only be built in coastal areas.");
         return;
     }
 
-    // Construir la estructura
+    // Build the structure
     gameState.money -= structure.cost;
     cell.structure = structureType;
     cell.element.innerHTML = structure.icon;
     cell.element.title = structure.name;
 
-    // Aplicar efectos
+    // Apply effects
     applyStructureEffects(structure.effects);
 
-    // Actualizar UI
+    // Update UI
     updateUI();
     
-    console.log(`Construido: ${structure.name} en celda (${cell.element.dataset.row}, ${cell.element.dataset.col})`);
+    console.log(`Built: ${structure.name} in cell (${cell.element.dataset.row}, ${cell.element.dataset.col})`);
 }
 
 /**
- * Aplica los efectos de una estructura a los recursos del juego
+ * Applies structure effects to game resources
  */
 function applyStructureEffects(effects) {
     Object.keys(effects).forEach(resource => {
         if (gameState.hasOwnProperty(resource)) {
             gameState[resource] += effects[resource];
-            // Asegurar que los valores estén en rangos válidos (0-100)
+            // Ensure values are in valid ranges (0-100)
             gameState[resource] = Math.max(0, Math.min(100, gameState[resource]));
         }
     });
 }
 
-// ========== SISTEMA DE TURNOS ==========
+// ========== TURN SYSTEM ==========
 
 /**
- * Avanza al siguiente turno
+ * Advances to the next turn
  */
 function nextTurn() {
     if (gameState.gameOver) {
-        console.log('Juego terminado, no se puede avanzar turno');
+        console.log('Game over, cannot advance turn');
         return;
     }
 
     gameState.turn++;
     gameState.currentYear += gameConfig.yearsPerTurn;
 
-    // Verificar límite de turnos
+    // Check turn limit
     if (gameState.turn > gameConfig.maxTurns) {
         gameState.gameOver = true;
-        showEventModal("Límite de Turnos", "Has alcanzado el límite máximo de turnos.");
+        showEventModal("Turn Limit", "You have reached the maximum turn limit.");
         return;
     }
 
@@ -283,15 +283,15 @@ function nextTurn() {
     checkGameEnd();
     updateUI();
     
-    // Guardar después de cada turno
+    // Save after each turn
     saveManager.saveGame(gameState);
 }
 
 /**
- * Procesa los eventos del turno actual
+ * Processes events for the current turn
  */
 function processTurnEvents() {
-    // Verificar eventos climáticos base
+    // Check base climate events
     climateEvents.forEach(event => {
         try {
             if (event.condition(gameState.currentYear, gameState.resilience, gameState.turn)) {
@@ -299,11 +299,11 @@ function processTurnEvents() {
                 handleEventResult(eventResult, event);
             }
         } catch (error) {
-            console.error('Error procesando evento climático:', error, event);
+            console.error('Error processing climate event:', error, event);
         }
     });
     
-    // Eventos NASA (10% de probabilidad por turno)
+    // NASA Events (10% probability per turn)
     if (Math.random() < 0.1) {
         const nasaEvent = getRandomNasaEvent();
         if (nasaEvent) {
@@ -312,17 +312,17 @@ function processTurnEvents() {
                 showEventModal(nasaEvent.name, nasaEvent.description);
                 handleEventResult(eventResult, nasaEvent);
             } catch (error) {
-                console.error('Error procesando evento NASA:', error, nasaEvent);
+                console.error('Error processing NASA event:', error, nasaEvent);
             }
         }
     }
     
-    // Ingresos base por turno
+    // Base income per turn
     gameState.money += 10;
 }
 
 /**
- * Maneja los resultados de los eventos
+ * Handles event results
  */
 function handleEventResult(eventResult, event) {
     switch (eventResult) {
@@ -330,30 +330,30 @@ function handleEventResult(eventResult, event) {
             triggerFlood();
             break;
         case 'STORM_DAMAGE':
-            showEventModal("Daño por Tormenta", "La infraestructura de la ciudad ha sufrido daños.");
+            showEventModal("Storm Damage", "The city's infrastructure has been damaged.");
             break;
         case 'NASA_EVENT_IMPACT':
-            showEventModal("Impacto de Evento Real", "Un evento climático real reportado por NASA ha afectado la ciudad.");
+            showEventModal("Real Event Impact", "A real climate event reported by NASA has affected the city.");
             break;
         case 'HEAT_WAVE':
-            showEventModal("Ola de Calor", "El consumo energético ha aumentado debido a las altas temperaturas.");
+            showEventModal("Heat Wave", "Energy consumption has increased due to high temperatures.");
             break;
         case 'POSITIVE_EVENT':
-            showEventModal("Evento Positivo", "La conciencia ambiental de la población ha traído beneficios.");
+            showEventModal("Positive Event", "The population's environmental awareness has brought benefits.");
             break;
         default:
-            // Evento sin efecto específico
+            // Event with no specific effect
             break;
     }
 }
 
-// ========== EVENTOS CLIMÁTICOS ==========
+// ========== CLIMATE EVENTS ==========
 
 /**
- * Obtiene el nivel del mar actual basado en datos NASA
+ * Gets current sea level based on NASA data
  */
 function getCurrentSeaLevel() {
-    // Priorizar datos NASA si están disponibles
+    // Prioritize NASA data if available
     if (gameState.nasaData && gameState.nasaData.seaLevel) {
         const baseRise = gameState.nasaData.seaLevel.currentRise;
         const additionalRise = (gameState.currentYear - new Date().getFullYear()) * 
@@ -361,7 +361,7 @@ function getCurrentSeaLevel() {
         return baseRise + additionalRise;
     }
     
-    // Fallback a datos simulados
+    // Fallback to simulated data
     for (let i = seaLevelData.length - 1; i >= 0; i--) {
         if (gameState.currentYear >= seaLevelData[i].year) {
             return seaLevelData[i].rise;
@@ -371,12 +371,12 @@ function getCurrentSeaLevel() {
 }
 
 /**
- * Activa una inundación en las celdas costeras
+ * Triggers a flood in coastal cells
  */
 function triggerFlood() {
     showEventModal(
-        "¡Inundación Costera!",
-        "El aumento del nivel del mar ha causado inundaciones en las zonas costeras no protegidas."
+        "Coastal Flood!",
+        "Sea level rise has caused flooding in unprotected coastal areas."
     );
 
     let floodedCells = 0;
@@ -384,7 +384,7 @@ function triggerFlood() {
     gameState.board.forEach(row => {
         row.forEach(cell => {
             if (cell.type === 'coast' && !cell.flooded) {
-                // Las celdas con manglares o diques tienen protección
+                // Cells with mangroves or seawalls have protection
                 const hasProtection = cell.structure === 'mangrove' || cell.structure === 'seawall';
                 
                 if (!hasProtection) {
@@ -393,7 +393,7 @@ function triggerFlood() {
                     cell.element.innerHTML = '💧';
                     floodedCells++;
                     
-                    // Penalización por inundación
+                    // Flood penalty
                     gameState.wellbeing -= 5;
                     gameState.money -= 5;
                 }
@@ -403,19 +403,19 @@ function triggerFlood() {
 
     if (floodedCells > 0) {
         showEventModal(
-            "Zonas Inundadas",
-            `${floodedCells} zonas costeras han sido inundadas. Bienestar y economía afectados.`
+            "Flooded Areas",
+            `${floodedCells} coastal areas have been flooded. Wellbeing and economy affected.`
         );
     }
 }
 
-// ========== SISTEMA DE GUARDADO ==========
+// ========== SAVE SYSTEM ==========
 
 /**
- * Configura el guardado automático
+ * Sets up automatic saving
  */
 function setupAutoSave() {
-    // Guardar automáticamente cada 2 minutos
+    // Auto-save every 2 minutes
     setInterval(() => {
         if (!gameState.gameOver) {
             saveManager.saveGame(gameState);
@@ -425,18 +425,18 @@ function setupAutoSave() {
 }
 
 /**
- * Muestra notificación de guardado automático
+ * Shows auto-save notification
  */
 function showAutoSaveNotification() {
     const notification = document.createElement('div');
     notification.className = 'save-notification';
-    notification.textContent = '💾 Partida guardada automáticamente';
+    notification.textContent = '💾 Game saved automatically';
     document.body.appendChild(notification);
     
-    // Animación de entrada
+    // Entry animation
     setTimeout(() => notification.style.opacity = '1', 10);
     
-    // Remover después de 2 segundos
+    // Remove after 2 seconds
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
@@ -447,28 +447,28 @@ function showAutoSaveNotification() {
     }, 2000);
 }
 
-// ========== INTERFAZ DE USUARIO ==========
+// ========== USER INTERFACE ==========
 
 /**
- * Actualiza la interfaz de usuario
+ * Updates the user interface
  */
 function updateUI() {
-    // Actualizar valores numéricos
+    // Update numerical values
     document.getElementById('money').textContent = Math.round(gameState.money);
     document.getElementById('wellbeing').textContent = Math.round(gameState.wellbeing);
     document.getElementById('environment').textContent = Math.round(gameState.environment);
     document.getElementById('resilience').textContent = Math.round(gameState.resilience);
     document.getElementById('year').textContent = gameState.currentYear;
 
-    // Actualizar colores de recursos
+    // Update resource colors
     updateResourceColors();
     
-    // Deshabilitar botones si el juego terminó
+    // Disable buttons if game ended
     updateButtonStates();
 }
 
 /**
- * Actualiza colores de recursos según su nivel
+ * Updates resource colors based on their level
  */
 function updateResourceColors() {
     const resources = {
@@ -486,13 +486,13 @@ function updateResourceColors() {
         let color;
         
         if (value < 25) {
-            color = '#e74c3c'; // Rojo (crítico)
+            color = '#e74c3c'; // Red (critical)
         } else if (value < 50) {
-            color = '#f39c12'; // Naranja (bajo)
+            color = '#f39c12'; // Orange (low)
         } else if (value < 75) {
-            color = '#f1c40f'; // Amarillo (medio)
+            color = '#f1c40f'; // Yellow (medium)
         } else {
-            color = '#2ecc71'; // Verde (bueno)
+            color = '#2ecc71'; // Green (good)
         }
         
         element.style.color = color;
@@ -500,7 +500,7 @@ function updateResourceColors() {
 }
 
 /**
- * Actualiza estados de los botones
+ * Updates button states
  */
 function updateButtonStates() {
     const nextTurnBtn = document.getElementById('next-turn-btn');
@@ -516,7 +516,7 @@ function updateButtonStates() {
 }
 
 /**
- * Muestra modal de eventos
+ * Shows event modal
  */
 function showEventModal(title, description) {
     const titleElement = document.getElementById('event-title');
@@ -529,21 +529,21 @@ function showEventModal(title, description) {
 }
 
 /**
- * Cierra modal de eventos
+ * Closes event modal
  */
 function closeEventModal() {
     const modal = document.getElementById('event-modal');
     if (modal) modal.classList.add('hidden');
 }
 
-// ========== SISTEMA NASA ==========
+// ========== NASA SYSTEM ==========
 
 /**
- * Inicializa datos de la NASA
+ * Initializes NASA data
  */
 async function initNasaData() {
     try {
-        console.log('🌍 Inicializando datos NASA en tiempo real...');
+        console.log('🌍 Initializing real-time NASA data...');
         
         const [seaLevelData, climateEvents, temperatureData, co2Data] = await Promise.all([
             nasaService.getSeaLevelData(),
@@ -552,9 +552,9 @@ async function initNasaData() {
             nasaService.getCO2Data()
         ]);
         
-        // Actualizar configuración del juego con datos reales
+        // Update game configuration with real data
         if (seaLevelData) {
-            gameConfig.seaLevelRisePerTurn = seaLevelData.currentRise / 20; // Ajustar para balance del juego
+            gameConfig.seaLevelRisePerTurn = seaLevelData.currentRise / 20; // Adjust for game balance
         }
         
         gameState.nasaData = {
@@ -565,20 +565,20 @@ async function initNasaData() {
             lastUpdated: new Date().toISOString()
         };
         
-        console.log('✅ Datos NASA en tiempo real cargados:', gameState.nasaData);
+        console.log('✅ Real-time NASA data loaded:', gameState.nasaData);
         showNasaDataPanel();
         
     } catch (error) {
-        console.error('❌ Error inicializando datos NASA:', error);
+        console.error('❌ Error initializing NASA data:', error);
         gameState.nasaData = this.getFallbackNasaData();
     }
 }
 
 /**
- * Refresca los datos de la NASA y actualiza la interfaz
+ * Refreshes NASA data and updates the interface
  */
 async function refreshNasaData() {
-    console.log("🔄 Actualizando datos NASA...");
+    console.log("🔄 Updating NASA data...");
 
     try {
         const [seaLevelData, climateEvents, temperatureData, co2Data] = await Promise.all([
@@ -588,7 +588,7 @@ async function refreshNasaData() {
             nasaService.getCO2Data()
         ]);
 
-        // Actualizamos el estado global
+        // Update global state
         gameState.nasaData = {
             seaLevel: seaLevelData,
             recentEvents: climateEvents,
@@ -597,42 +597,42 @@ async function refreshNasaData() {
             lastUpdated: new Date().toISOString()
         };
 
-        console.log("✅ Datos NASA actualizados:", gameState.nasaData);
+        console.log("✅ NASA data updated:", gameState.nasaData);
 
-        // Redibujar el panel con la nueva info
+        // Redraw panel with new info
         showNasaDataPanel();
 
     } catch (error) {
-        console.error("❌ Error refrescando datos NASA:", error);
-        showEventModal("Error", "No se pudieron actualizar los datos de la NASA. Intenta nuevamente más tarde.");
+        console.error("❌ Error refreshing NASA data:", error);
+        showEventModal("Error", "Could not update NASA data. Please try again later.");
     }
 }
 
-// Hacerla accesible globalmente para el botón
+// Make it globally accessible for the button
 window.refreshNasaData = refreshNasaData;
 
 /**
- * Muestra panel de datos NASA en la UI
+ * Shows NASA data panel in the UI
  */
 function showNasaDataPanel() {
     const controlPanel = document.getElementById('control-panel');
     if (!controlPanel) return;
     
-	//remover panel si existe
+	//remove panel if it exists
     const existingPanel = document.getElementById('nasa-data-panel');
     if (existingPanel) existingPanel.remove();
     
     const nasaPanel = document.createElement('div');
     nasaPanel.id = 'nasa-data-panel';
     nasaPanel.innerHTML = `
-        <h3>🌍 Datos NASA en Tiempo Real</h3>
+        <h3>🌍 Real-Time NASA Data</h3>
         <div class="nasa-metrics-grid">
             <div class="nasa-metric ${gameState.nasaData?.seaLevel?.trend > 3.5 ? 'warning' : ''}">
                 <div class="metric-icon">🌊</div>
                 <div class="metric-info">
                     <div class="metric-value">+${(gameState.nasaData.seaLevel.currentRise * 100).toFixed(1)}cm</div>
-                    <div class="metric-label">Nivel del Mar</div>
-                    <div class="metric-trend">${gameState.nasaData.seaLevel.trend.toFixed(1)} mm/año</div>
+                    <div class="metric-label">Sea Level</div>
+                    <div class="metric-trend">${gameState.nasaData.seaLevel.trend.toFixed(1)} mm/year</div>
                 </div>
             </div>
             
@@ -640,8 +640,8 @@ function showNasaDataPanel() {
                 <div class="metric-icon">🌡️</div>
                 <div class="metric-info">
                     <div class="metric-value">+${gameState.nasaData.temperature.anomaly.toFixed(1)}°C</div>
-                    <div class="metric-label">Calentamiento</div>
-                    <div class="metric-trend">${gameState.nasaData.temperature.trend}°C/década</div>
+                    <div class="metric-label">Warming</div>
+                    <div class="metric-trend">${gameState.nasaData.temperature.trend}°C/decade</div>
                 </div>
             </div>
             
@@ -650,13 +650,13 @@ function showNasaDataPanel() {
                 <div class="metric-info">
                     <div class="metric-value">${gameState.nasaData.co2.co2Level.toFixed(0)}</div>
                     <div class="metric-label">CO₂ (ppm)</div>
-                    <div class="metric-trend">+${gameState.nasaData.co2.trend} ppm/año</div>
+                    <div class="metric-trend">+${gameState.nasaData.co2.trend} ppm/year</div>
                 </div>
             </div>
         </div>
         
         <div class="nasa-events">
-            <h4>📡 Eventos Activos</h4>
+            <h4>📡 Active Events</h4>
             ${gameState.nasaData.recentEvents.map(event => `
                 <div class="nasa-event ${event.magnitude > 0.7 ? 'high-impact' : ''}">
                     <span class="event-type">${event.type}</span>
@@ -667,8 +667,8 @@ function showNasaDataPanel() {
         </div>
         
         <div class="nasa-footer">
-            <small>Última actualización: ${new Date(gameState.nasaData.lastUpdated).toLocaleTimeString()}</small>
-            <button onclick="refreshNasaData()" class="refresh-btn">🔄 Actualizar</button>
+            <small>Last update: ${new Date(gameState.nasaData.lastUpdated).toLocaleTimeString()}</small>
+            <button onclick="refreshNasaData()" class="refresh-btn">🔄 Update</button>
         </div>
     `;
     
@@ -676,7 +676,7 @@ function showNasaDataPanel() {
 }
 
 /**
- * Obtiene un evento aleatorio de la NASA
+ * Gets a random NASA event
  */
 function getRandomNasaEvent() {
     if (!gameState.nasaData || !gameState.nasaData.recentEvents || gameState.nasaData.recentEvents.length === 0) {
@@ -688,10 +688,10 @@ function getRandomNasaEvent() {
     ];
     
     return {
-        name: `Evento NASA: ${randomEvent.title}`,
-        description: `Basado en datos satelitales recientes. ${randomEvent.title} reportado por NASA EONET.`,
+        name: `NASA Event: ${randomEvent.title}`,
+        description: `Based on recent satellite data. ${randomEvent.title} reported by NASA EONET.`,
         effect: (gameState) => {
-            // Efecto más severo para eventos reales
+            // More severe effect for real events
             if (gameState.resilience < 40) {
                 gameState.wellbeing -= 15;
                 gameState.money -= 10;
@@ -703,17 +703,17 @@ function getRandomNasaEvent() {
 }
 
 function updateNasaUI({ events, seaLevel, temp, co2 }) {
-    // Buscar contenedores en tu HTML
+    // Look for containers in your HTML
     const statsContent = document.getElementById("stats-content");
 
     if (!statsContent) return;
 
     statsContent.innerHTML = `
-        <h3>🌍 Datos NASA Actualizados</h3>
-        <p><strong>🌊 Nivel del Mar:</strong> ${seaLevel.currentRise.toFixed(2)} m (tendencia: ${seaLevel.trend.toFixed(2)} mm/año)</p>
-        <p><strong>🌡️ Temperatura Global:</strong> +${temp.anomaly.toFixed(2)} °C (tendencia: ${temp.trend.toFixed(2)} °C/año)</p>
-        <p><strong>🌫️ CO₂ Atmosférico:</strong> ${co2.co2Level.toFixed(1)} ppm (tendencia: ${co2.trend.toFixed(1)} ppm/año)</p>
-        <h4>🌪️ Últimos eventos climáticos</h4>
+        <h3>🌍 Updated NASA Data</h3>
+        <p><strong>🌊 Sea Level:</strong> ${seaLevel.currentRise.toFixed(2)} m (trend: ${seaLevel.trend.toFixed(2)} mm/year)</p>
+        <p><strong>🌡️ Global Temperature:</strong> +${temp.anomaly.toFixed(2)} °C (trend: ${temp.trend.toFixed(2)} °C/year)</p>
+        <p><strong>🌫️ Atmospheric CO₂:</strong> ${co2.co2Level.toFixed(1)} ppm (trend: ${co2.trend.toFixed(1)} ppm/year)</p>
+        <h4>🌪️ Latest climate events</h4>
         <ul>
             ${events.map(ev => `
                 <li>
@@ -726,13 +726,13 @@ function updateNasaUI({ events, seaLevel, temp, co2 }) {
 }
 
 
-// ========== GESTIÓN DEL JUEGO ==========
+// ========== GAME MANAGEMENT ==========
 
 /**
- * Verifica condiciones de fin del juego
+ * Checks game end conditions
  */
 function checkGameEnd() {
-    // Condición de derrota
+    // Defeat condition
     if (gameState.wellbeing <= defeatConditions.minWellbeing || 
         gameState.money <= defeatConditions.minMoney || 
         gameState.environment <= defeatConditions.minEnvironment) {
@@ -742,11 +742,11 @@ function checkGameEnd() {
         saveManager.clearSave();
         
         const randomMessage = gameTexts.defeat[Math.floor(Math.random() * gameTexts.defeat.length)];
-        showEventModal("Juego Terminado - Derrota", randomMessage);
+        showEventModal("Game Over - Defeat", randomMessage);
         return;
     }
 
-    // Condición de victoria
+    // Victory condition
     if (gameState.currentYear >= victoryConditions.minYear && 
         gameState.wellbeing >= victoryConditions.minWellbeing && 
         gameState.resilience >= victoryConditions.minResilience &&
@@ -757,11 +757,11 @@ function checkGameEnd() {
         saveManager.clearSave();
         
         const randomMessage = gameTexts.victory[Math.floor(Math.random() * gameTexts.victory.length)];
-        showEventModal("¡Victoria!", randomMessage);
+        showEventModal("Victory!", randomMessage);
         return;
     }
 
-    // Victoria por tiempo (llegar a 2100)
+    // Victory by time (reaching 2100)
     if (gameState.currentYear >= 2100) {
         gameState.gameOver = true;
         saveManager.saveGameStats(gameState);
@@ -769,78 +769,78 @@ function checkGameEnd() {
         
         const score = saveManager.calculateScore(gameState);
         if (score >= 200) {
-            showEventModal("¡Éxito Sostenible!", "Has guiado a la ciudad a través de 76 años de cambios climáticos. Tu gestión balanceada ha asegurado un futuro próspero.");
+            showEventModal("Sustainable Success!", "You have guided the city through 76 years of climate change. Your balanced management has secured a prosperous future.");
         } else {
-            showEventModal("Fin del Juego", `Has llegado al año 2100. La ciudad sobrevive, pero podría haberlo hecho mejor. Puntuación final: ${Math.round(score)}`);
+            showEventModal("Game End", `You have reached the year 2100. The city survives, but could have done better. Final score: ${Math.round(score)}`);
         }
     }
 }
 
 /**
- * Muestra prompt para cargar partida
+ * Shows prompt to load game
  */
 function showLoadGamePrompt() {
-    if (confirm('¿Deseas continuar tu partida guardada?')) {
+    if (confirm('Do you want to continue your saved game?')) {
         showEventModal(
-            "Partida Cargada", 
-            `Bienvenido de nuevo. Continuamos en el año ${gameState.currentYear}.`
+            "Game Loaded", 
+            `Welcome back. We continue in the year ${gameState.currentYear}.`
         );
     } else {
-        // Iniciar nueva partida
+        // Start new game
         saveManager.clearSave();
         location.reload();
     }
 }
 
-// ========== CONTROLES DE GUARDADO ==========
+// ========== SAVE CONTROLS ==========
 
 /**
- * Guarda la partida manualmente
+ * Saves the game manually
  */
 function manualSave() {
     if (saveManager.saveGame(gameState)) {
-        showEventModal("Partida Guardada", "Tu progreso ha sido guardado exitosamente.");
+        showEventModal("Game Saved", "Your progress has been saved successfully.");
     } else {
-        showEventModal("Error", "No se pudo guardar la partida. Intenta nuevamente.");
+        showEventModal("Error", "Could not save the game. Please try again.");
     }
 }
 
 /**
- * Carga partida manualmente
+ * Loads game manually
  */
 function manualLoad() {
     if (saveManager.hasSavedGame()) {
-        if (confirm('¿Cargar partida guardada? Se perderá el progreso actual.')) {
+        if (confirm('Load saved game? Current progress will be lost.')) {
             location.reload();
         }
     } else {
-        alert('No hay partida guardada.');
+        alert('No saved game.');
     }
 }
 
 /**
- * Inicia nuevo juego
+ * Starts new game
  */
 function newGame() {
-    if (confirm('¿Iniciar nueva partida? Se perderá el progreso no guardado.')) {
+    if (confirm('Start new game? Unsaved progress will be lost.')) {
         saveManager.clearSave();
         location.reload();
     }
 }
 
 /**
- * Reinicia el juego
+ * Restarts the game
  */
 function restartGame() {
-    if (confirm("¿Estás seguro de que quieres reiniciar el juego?")) {
+    if (confirm("Are you sure you want to restart the game?")) {
         location.reload();
     }
 }
 
-// ========== SISTEMA DE ESTADÍSTICAS ==========
+// ========== STATISTICS SYSTEM ==========
 
 /**
- * Muestra estadísticas de partidas
+ * Shows game statistics
  */
 function viewStats() {
     const stats = saveManager.loadGameStats();
@@ -848,14 +848,14 @@ function viewStats() {
     const statsModal = document.getElementById('stats-modal');
     
     if (!statsContent || !statsModal) {
-        alert('Error: No se pudo cargar el sistema de estadísticas.');
+        alert('Error: Could not load statistics system.');
         return;
     }
     
-    let html = `<h3>Resumen de Partidas</h3>`;
+    let html = `<h3>Game Summary</h3>`;
     
     if (stats.sessions.length === 0) {
-        html += `<p>No hay estadísticas de partidas anteriores.</p>`;
+        html += `<p>No previous game statistics.</p>`;
     } else {
         const totalGames = stats.sessions.length;
         const victories = stats.sessions.filter(s => s.outcome === 'victory').length;
@@ -864,19 +864,19 @@ function viewStats() {
         
         html += `
             <div class="stats-summary">
-                <p><strong>Total de partidas:</strong> ${totalGames}</p>
-                <p><strong>Victorias:</strong> ${victories}</p>
-                <p><strong>Derrotas:</strong> ${defeats}</p>
-                <p><strong>Mejor puntuación:</strong> ${bestScore}</p>
+                <p><strong>Total games:</strong> ${totalGames}</p>
+                <p><strong>Victories:</strong> ${victories}</p>
+                <p><strong>Defeats:</strong> ${defeats}</p>
+                <p><strong>Best score:</strong> ${bestScore}</p>
             </div>
-            <h4>Historial:</h4>
+            <h4>History:</h4>
             <div class="sessions-list">
                 ${stats.sessions.slice().reverse().map(session => `
                     <div class="session-item">
                         <strong>${new Date(session.date).toLocaleDateString()}</strong>
-                        - Año: ${session.finalYear} 
-                        - Puntuación: ${session.finalScore}
-                        - ${session.outcome === 'victory' ? '🏆 Victoria' : session.outcome === 'defeat' ? '💀 Derrota' : '⏸️ Incompleta'}
+                        - Year: ${session.finalYear} 
+                        - Score: ${session.finalScore}
+                        - ${session.outcome === 'victory' ? '🏆 Victory' : session.outcome === 'defeat' ? '💀 Defeat' : '⏸️ Incomplete'}
                     </div>
                 `).join('')}
             </div>
@@ -888,7 +888,7 @@ function viewStats() {
 }
 
 /**
- * Cierra modal de estadísticas
+ * Closes statistics modal
  */
 function closeStatsModal() {
     const statsModal = document.getElementById('stats-modal');
@@ -896,37 +896,37 @@ function closeStatsModal() {
 }
 
 /**
- * Exporta partida actual
+ * Exports current game
  */
 function exportSave() {
     if (saveManager.exportSave()) {
-        alert('Partida exportada exitosamente.');
+        alert('Game exported successfully.');
     } else {
-        alert('No hay partida para exportar.');
+        alert('No game to export.');
     }
 }
 
 /**
- * Importa partida desde archivo
+ * Imports game from file
  */
 async function importSave(file) {
     if (!file) return;
     
     try {
         await saveManager.importSave(file);
-        alert('Partida importada exitosamente. Recarga la página para jugar.');
+        alert('Game imported successfully. Reload the page to play.');
     } catch (error) {
-        alert('Error importando partida: ' + error.message);
+        alert('Error importing game: ' + error.message);
     }
 }
 
 // ========== EVENT LISTENERS ==========
 
 /**
- * Configura event listeners
+ * Sets up event listeners
  */
 function setupEventListeners() {
-    // Teclado shortcuts
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !gameState.gameOver) {
             nextTurn();
@@ -944,7 +944,7 @@ function setupEventListeners() {
         }
     });
 
-    // Prevenir acciones por defecto en modales
+    // Prevent default actions in modals
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -1074,12 +1074,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initApiConfigUI();
 });
 
-// ====== Consultar IA usando la configuración dinámica ======
+// ====== Consult AI using dynamic configuration ======
 async function consultAI() {
-    // Leer config
+    // Read config
     const cfg = loadApiConfig();
 
-    // Si no hay config, pedirla al usuario
+    // If no config, ask user for it
     if (!cfg || !cfg.apiKey) {
         showApiConfigModal();
         return;
@@ -1088,7 +1088,7 @@ async function consultAI() {
     const provider = cfg.provider;
     const apiKey = cfg.apiKey;
 
-    // Construir prompt a partir del estado del juego
+    // Build prompt from game state
     const state = {
         turno: gameState.turn,
         dinero: gameState.money,
@@ -1099,22 +1099,22 @@ async function consultAI() {
     };
 
     const aiPrompt = `
-Estado actual del juego:
-- Turno: ${state.turno}
-- Dinero: ${state.dinero}
-- Bienestar: ${state.bienestar}
-- Medio Ambiente: ${state.medioAmbiente}
-- Resiliencia: ${state.resiliencia}
-- Datos NASA: ${JSON.stringify(state.nasa)}
+Current game state:
+- Turn: ${state.turno}
+- Money: ${state.dinero}
+- Wellbeing: ${state.bienestar}
+- Environment: ${state.medioAmbiente}
+- Resilience: ${state.resiliencia}
+- NASA Data: ${JSON.stringify(state.nasa)}
 
-Actúa como un asesor experto en gestión climática y urbanística.
-Da una recomendación clara y práctica de qué acciones debería tomar el jugador para proteger la costa y sobrevivir.
+Act as an expert advisor in climate management and urban planning.
+Give a clear and practical recommendation on what actions the player should take to protect the coast and survive.
 `.trim();
 
-    // Mostrar modal de IA (carga)
+    // Show AI modal (loading)
     const aiResponseEl = document.getElementById("ai-response");
     if (aiResponseEl) {
-        aiResponseEl.innerHTML = `<p>🔄 Consultando a ${provider.toUpperCase()}...</p>`;
+        aiResponseEl.innerHTML = `<p>🔄 Consulting ${provider.toUpperCase()}...</p>`;
         document.getElementById("ai-modal").classList.remove("hidden");
     }
 
@@ -1122,14 +1122,14 @@ Da una recomendación clara y práctica de qué acciones debería tomar el jugad
         let aiText = '';
 
         if (provider === 'gemini') {
-            // Gemini (ejemplo con gemini-2.5-flash-lite)
+            // Gemini (example with gemini-2.5-flash-lite)
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
             const resp = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    // estructura básica; puedes personalizar safetySettings, temperature, etc.
+                    // basic structure; you can customize safetySettings, temperature, etc.
                     contents: [
                         { role: "user", parts: [{ text: aiPrompt }] }
                     ]
@@ -1138,10 +1138,10 @@ Da una recomendación clara y práctica de qué acciones debería tomar el jugad
 
             const data = await resp.json();
             if (data.error) throw new Error(data.error.message || JSON.stringify(data));
-            aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Gemini no devolvió respuesta.";
+            aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Gemini did not return a response.";
 
         } else if (provider === 'openai') {
-            // OpenAI (si alguien quiere usarla) - ejemplo con Chat Completions
+            // OpenAI (if someone wants to use it) - example with Chat Completions
             const resp = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: "POST",
                 headers: {
@@ -1151,7 +1151,7 @@ Da una recomendación clara y práctica de qué acciones debería tomar el jugad
                 body: JSON.stringify({
                     model: "gpt-4o-mini",
                     messages: [
-                        { role: "system", content: "Eres un asesor climático experto." },
+                        { role: "system", content: "You are an expert climate advisor." },
                         { role: "user", content: aiPrompt }
                     ],
                     temperature: 0.7
@@ -1160,27 +1160,27 @@ Da una recomendación clara y práctica de qué acciones debería tomar el jugad
 
             const data = await resp.json();
             if (data.error) throw new Error(data.error.message || JSON.stringify(data));
-            aiText = data.choices?.[0]?.message?.content || "⚠️ OpenAI no devolvió respuesta.";
+            aiText = data.choices?.[0]?.message?.content || "⚠️ OpenAI did not return a response.";
 
         } else {
-            // Otro: intentar una POST genérica si el usuario desea (esto es una plantilla)
-            throw new Error("Proveedor no soportado en esta versión. Usa Gemini u OpenAI.");
+            // Other: try a generic POST if user wants (this is a template)
+            throw new Error("Provider not supported in this version. Use Gemini or OpenAI.");
         }
 
-        // Mostrar respuesta
+        // Show response
         if (aiResponseEl) {
             aiResponseEl.innerHTML = `<pre style="white-space:pre-wrap;">${escapeHtml(aiText)}</pre>`;
         }
 
     } catch (error) {
-        console.error("Error al consultar la IA:", error);
+        console.error("Error consulting AI:", error);
         if (aiResponseEl) {
-            aiResponseEl.innerHTML = `<p style="color:red;">❌ Error al consultar la IA:<br>${escapeHtml(error.message || String(error))}</p>`;
+            aiResponseEl.innerHTML = `<p style="color:red;">❌ Error consulting AI:<br>${escapeHtml(error.message || String(error))}</p>`;
         }
     }
 }
 
-/** Helper para escapar HTML y evitar inyección si mostramos texto */
+/** Helper to escape HTML and prevent injection if we display text */
 function escapeHtml(text) {
     if (!text) return '';
     return String(text)

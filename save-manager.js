@@ -1,4 +1,4 @@
-// save-manager.js - Sistema de Guardado con localStorage
+// save-manager.js - Save System with localStorage
 
 class SaveManager {
     constructor() {

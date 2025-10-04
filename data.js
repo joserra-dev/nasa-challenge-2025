@@ -1,6 +1,6 @@
-// data.js - Configuración y Datos del Juego
+// data.js - Game Configuration and Data
 
-// Configuración inicial del juego
+// Initial game configuration
 const gameConfig = {
     initialYear: 2025,
     yearsPerTurn: 5,
@@ -8,12 +8,12 @@ const gameConfig = {
     initialWellbeing: 50,
     initialEnvironment: 50,
     initialResilience: 20,
-    seaLevelRisePerTurn: 0.05, // en metros (basado en datos reales de la NASA)
+    seaLevelRisePerTurn: 0.05, // in meters (based on real NASA data)
     floodRiskBase: 0.1,
-    maxTurns: 100 // Límite de turnos para prevenir bucles infinitos
+    maxTurns: 100 // Turn limit to prevent infinite loops
 };
 
-// Añadir a gameConfig (CORREGIDO - sin referencia a gameState)
+// Add to gameConfig (CORRECTED - without reference to gameState)
 const difficultySettings = {
     easy: {
         initialMoney: 150,
@@ -37,38 +37,38 @@ const difficultySettings = {
     }
 };
 
-// Función para actualizar dificultad realista con datos NASA
+// Function to update realistic difficulty with NASA data
 function updateRealisticDifficulty(nasaData) {
     if (nasaData && nasaData.seaLevel) {
         difficultySettings.realistic.seaLevelRisePerTurn = nasaData.seaLevel.trend / 1000;
     }
 }
 
-// Costos y efectos de las estructuras
+// Structure costs and effects
 const structures = {
     residential: {
-        name: "Zona Residencial",
+        name: "Residential Zone",
         cost: 20,
         effects: { wellbeing: +10, environment: -5 },
         icon: "🏠",
         canBuild: (cell) => cell.type === 'land' || cell.type === 'coast'
     },
     industrial: {
-        name: "Zona Industrial", 
+        name: "Industrial Zone", 
         cost: 30,
         effects: { money: +15, environment: -10 },
         icon: "🏭",
         canBuild: (cell) => cell.type === 'land' || cell.type === 'coast'
     },
     mangrove: {
-        name: "Manglar Restaurado",
+        name: "Restored Mangrove",
         cost: 15,
         effects: { environment: +15, resilience: +5 },
         icon: "🟢",
         canBuild: (cell) => cell.type === 'coast' && !cell.flooded
     },
     seawall: {
-        name: "Dique de Protección",
+        name: "Protection Seawall",
         cost: 25,
         effects: { resilience: +10 },
         icon: "🛡️",
@@ -76,23 +76,23 @@ const structures = {
     }
 };
 
-// Sistema de logros y metas (CORREGIDO - funciones que reciben gameState como parámetro)
+// Achievement and goal system (CORRECTED - functions that receive gameState as parameter)
 const achievements = {
     earlyPlanner: {
-        name: "Planificador Temprano",
-        description: "Alcanza 50 de resiliencia antes del año 2050",
+        name: "Early Planner",
+        description: "Reach 50 resilience before year 2050",
         check: (gameState) => gameState.currentYear < 2050 && gameState.resilience >= 50,
         reward: { money: 50, wellbeing: 10 }
     },
     ecoWarrior: {
-        name: "Guerrero Ecológico",
-        description: "Mantén el ambiente por encima de 80 por 10 turnos consecutivos",
+        name: "Eco Warrior",
+        description: "Keep environment above 80 for 10 consecutive turns",
         check: (gameState) => gameState.environment >= 80,
         reward: { environment: 15, resilience: 10 }
     },
     coastalGuardian: {
-        name: "Guardián Costero",
-        description: "Protege todas las celdas costeras con manglares o diques",
+        name: "Coastal Guardian",
+        description: "Protect all coastal cells with mangroves or seawalls",
         check: (gameState) => {
             const coastalCells = gameState.board.flat().filter(cell => cell.type === 'coast');
             return coastalCells.every(cell => cell.structure === 'mangrove' || cell.structure === 'seawall');
@@ -101,31 +101,31 @@ const achievements = {
     }
 };
 
-// Tipos de celdas del tablero
+// Board cell types
 const cellTypes = {
     land: {
-        name: "Tierra",
+        name: "Land",
         color: "#27ae60",
         buildable: true
     },
     coast: {
-        name: "Costa", 
+        name: "Coast", 
         color: "#3498db",
         buildable: true
     },
     flooded: {
-        name: "Inundado",
+        name: "Flooded",
         color: "#8e44ad",
         buildable: false
     }
 };
 
-// Eventos climáticos basados en datos de la NASA (CORREGIDO - sin referencia directa a gameState)
+// Climate events based on NASA data (CORRECTED - without direct reference to gameState)
 const climateEvents = [
     {
         id: "sea_level_rise",
-        name: "Aumento del Nivel del Mar",
-        description: "El nivel del mar ha subido significativamente. Las áreas costeras no protegidas están en riesgo.",
+        name: "Sea Level Rise",
+        description: "Sea level has risen significantly. Unprotected coastal areas are at risk.",
         condition: (year, resilience, turn) => year >= 2030 && turn % 3 === 0,
         effect: (gameState) => {
             const floodChance = gameConfig.floodRiskBase - (gameState.resilience * 0.01);
@@ -138,8 +138,8 @@ const climateEvents = [
     },
     {
         id: "intense_storm", 
-        name: "Tormenta Intensa",
-        description: "Una tormenta poderosa golpea la costa. La resiliencia de la ciudad es puesta a prueba.",
+        name: "Intense Storm",
+        description: "A powerful storm hits the coast. The city's resilience is put to the test.",
         condition: (year, resilience, turn) => Math.random() < 0.3 && turn > 2,
         effect: (gameState) => {
             if (gameState.resilience < 30) {
@@ -153,8 +153,8 @@ const climateEvents = [
     },
     {
         id: "heat_wave",
-        name: "Ola de Calor",
-        description: "Una prolongada ola de calor afecta la ciudad, aumentando el consumo energético.",
+        name: "Heat Wave",
+        description: "A prolonged heat wave affects the city, increasing energy consumption.",
         condition: (year, resilience, turn) => Math.random() < 0.2 && year >= 2040,
         effect: (gameState) => {
             gameState.money -= 8;
@@ -165,8 +165,8 @@ const climateEvents = [
     },
     {
         id: "environmental_awareness",
-        name: "Conciencia Ambiental",
-        description: "La población se vuelve más consciente del medio ambiente, apoyando iniciativas verdes.",
+        name: "Environmental Awareness",
+        description: "The population becomes more environmentally conscious, supporting green initiatives.",
         condition: (year, resilience, turn) => Math.random() < 0.15 && gameState.environment > 60,
         effect: (gameState) => {
             gameState.wellbeing += 10;
@@ -177,15 +177,15 @@ const climateEvents = [
     }
 ];
 
-// Eventos NASA (se añadirán dinámicamente después)
+// NASA Events (will be added dynamically later)
 let nasaClimateEvents = [];
 
-// Función para añadir eventos NASA dinámicamente
+// Function to add NASA events dynamically
 function addNasaClimateEvents(nasaData) {
     nasaClimateEvents = [
         {
-            name: "Evento de Calor Extremo NASA",
-            description: "Basado en datos reales de temperatura global de la NASA. Las olas de calor son más frecuentes e intensas.",
+            name: "NASA Extreme Heat Event",
+            description: "Based on real NASA global temperature data. Heat waves are more frequent and intense.",
             condition: (year, resilience, turn) => {
                 return nasaData?.temperature?.anomaly > 1.2 && Math.random() < 0.4;
             },
@@ -196,11 +196,11 @@ function addNasaClimateEvents(nasaData) {
             }
         },
         {
-            name: "Aceleración del Nivel del Mar",
-            description: `Los datos del satélite Jason-3 muestran una aceleración en el aumento del nivel del mar`,
+            name: "Sea Level Acceleration",
+            description: `Jason-3 satellite data shows acceleration in sea level rise`,
             condition: (year, resilience, turn) => year >= 2040 && turn % 5 === 0,
             effect: (gameState) => {
-                // Aumentar temporalmente la tasa de inundación
+                // Temporarily increase flood rate
                 const originalRisk = gameConfig.floodRiskBase;
                 gameConfig.floodRiskBase += 0.1;
                 setTimeout(() => {
@@ -212,45 +212,45 @@ function addNasaClimateEvents(nasaData) {
     ];
 }
 
-// Función para obtener todos los eventos climáticos (base + NASA)
+// Function to get all climate events (base + NASA)
 function getAllClimateEvents() {
     return [...climateEvents, ...nasaClimateEvents];
 }
 
-// Tecnologías (CORREGIDO - funciones que reciben gameState como parámetro)
+// Technologies (CORRECTED - functions that receive gameState as parameter)
 const technologies = {
     earlyWarning: {
-        name: "Sistema de Alerta Temprana",
+        name: "Early Warning System",
         cost: 80,
-        description: "Reduce el daño de eventos climáticos en un 30%",
+        description: "Reduces climate event damage by 30%",
         effect: (gameState) => {
             gameState.resilience += 15;
-            // Implementar lógica de reducción de daño
+            // Implement damage reduction logic
         },
         requirements: { turn: 5, money: 100 }
     },
     greenEnergy: {
-        name: "Transición a Energía Verde",
+        name: "Green Energy Transition",
         cost: 120,
-        description: "Las industrias contaminan menos y generan más dinero",
+        description: "Industries pollute less and generate more money",
         effect: (gameState) => {
-            // Modificar efectos de estructuras existentes
+            // Modify effects of existing structures
         },
         requirements: { environment: 60, turn: 10 }
     },
     coastalEngineering: {
-        name: "Ingeniería Costera Avanzada",
+        name: "Advanced Coastal Engineering",
         cost: 150,
-        description: "Los diques son más efectivos y baratos",
+        description: "Seawalls are more effective and cheaper",
         effect: (gameState) => {
-            // Estas modificaciones serían temporales para esta partida
+            // These modifications would be temporary for this game
             console.log("Ingeniería costera aplicada");
         },
         requirements: { resilience: 40, money: 200 }
     }
 };
 
-// Datos de elevación del nivel del mar (simulados basados en proyecciones NASA)
+// Sea level elevation data (simulated based on NASA projections)
 const seaLevelData = [
     { year: 2020, rise: 0.00, source: "NASA Satellite Data" },
     { year: 2025, rise: 0.02, source: "NASA Projection" },
@@ -267,9 +267,9 @@ const seaLevelData = [
     { year: 2100, rise: 0.85, source: "NASA Long-term Projection" }
 ];
 
-// Configuración de APIs NASA
+// NASA API configuration
 const nasaAPIs = {
-    // API de Eventos Climáticos (EONET)
+    // Climate Events API (EONET)
     eonet: {
         url: 'https://eonet.gsfc.nasa.gov/api/v3/events',
         cache: null,
@@ -277,7 +277,7 @@ const nasaAPIs = {
         cacheDuration: 1000 * 60 * 30 // 30 minutos
     },
     
-    // API de Imágenes Satelitales (GIBS)
+    // Satellite Images API (GIBS)
     gibs: {
         baseUrl: 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi',
         layers: {
@@ -289,18 +289,18 @@ const nasaAPIs = {
     }
 };
 
-// Clave API NASA
+// NASA API Key
 const NASA_API_KEY = 'Lgq2xsi7Rn1HgRPyyX1AvbgNivaFSdflQQKqQdeo';
 
-// Configuración del sistema de guardado
+// Save system configuration
 const saveConfig = {
     version: '1.0.0',
-    autoSaveInterval: 120000, // 2 minutos en milisegundos
+    autoSaveInterval: 120000, // 2 minutes in milliseconds
     maxSaveSlots: 5,
     backupEnabled: true
 };
 
-// Estados del juego para el sistema de guardado
+// Game states for the save system
 const gameStates = {
     PLAYING: 'playing',
     VICTORY: 'victory',
@@ -308,7 +308,7 @@ const gameStates = {
     PAUSED: 'paused'
 };
 
-// Umbrales para condiciones de victoria/derrota
+// Thresholds for victory/defeat conditions
 const victoryConditions = {
     minYear: 2060,
     minWellbeing: 60,
@@ -322,18 +322,18 @@ const defeatConditions = {
     minEnvironment: 0
 };
 
-// Textos para eventos y mensajes
+// Texts for events and messages
 const gameTexts = {
     victory: [
-        "¡Felicidades! Has guiado a la ciudad hacia un futuro resiliente y sostenible.",
-        "La ciudad está preparada para los desafíos climáticos del siglo XXI.",
-        "Tu gestión balanceada ha asegurado un futuro próspero para las generaciones venideras."
+        "Congratulations! You have guided the city towards a resilient and sustainable future.",
+        "The city is prepared for the climate challenges of the 21st century.",
+        "Your balanced management has secured a prosperous future for future generations."
     ],
     defeat: [
-        "La ciudad no ha podido adaptarse al cambio climático.",
-        "Los recursos se han agotado y la población ha sufrido las consecuencias.",
-        "La falta de planificación a largo plazo ha llevado al colapso de la ciudad."
+        "The city has not been able to adapt to climate change.",
+        "Resources have been exhausted and the population has suffered the consequences.",
+        "Lack of long-term planning has led to the city's collapse."
     ],
-    floodWarning: "Las áreas costeras sin protección están en riesgo de inundación.",
-    resilienceTip: "Invertir en manglares y diques aumenta la resiliencia costera."
+    floodWarning: "Unprotected coastal areas are at risk of flooding.",
+    resilienceTip: "Investing in mangroves and seawalls increases coastal resilience."
 };

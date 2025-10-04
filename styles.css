@@ -1,4 +1,4 @@
-/* === TIPOGRAFÍA GLOBAL === */
+/* === GLOBAL TYPOGRAPHY === */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 body {
@@ -11,7 +11,7 @@ body {
     min-height: 100vh;
 }
 
-/* Animación de fondo tipo olas */
+/* Ocean-like background animation */
 @keyframes oceanFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -62,14 +62,14 @@ h1 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* === LAYOUT PRINCIPAL === */
+/* === MAIN LAYOUT === */
 main {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
 }
 
-/* === TABLERO === */
+/* === BOARD === */
 #game-board {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
@@ -118,7 +118,7 @@ main {
     border-color: #9b59b6;
 }
 
-/* Animación al construir algo */
+/* Animation when building something */
 .cell.build {
     animation: popIn 0.4s ease;
 }
@@ -144,7 +144,7 @@ main {
 }
 .cell:hover::after { opacity: 1; }
 
-/* === PANEL DE CONTROL === */
+/* === CONTROL PANEL === */
 #control-panel {
     background: rgba(255, 255, 255, 0.95);
     padding: 20px;
@@ -206,7 +206,7 @@ main {
     box-shadow: none;
 }
 
-/* === MODALES === */
+/* === MODALS === */
 .modal {
     position: fixed;
     top: 0;
@@ -235,7 +235,7 @@ main {
 .btn { padding: 8px 12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; }
 .btn.primary { background:#1d72f3;color:#fff;border-color:transparent; }
 
-/* === PANEL NASA === */
+/* === NASA PANEL === */
 #nasa-data-panel {
     background: linear-gradient(135deg, #0b3d91, #1a5f9e);
     color: white;
@@ -273,7 +273,7 @@ main {
     color: #f1c40f;
 }
 
-/* Estilos para controles de guardado */
+/* Styles for save controls */
 .save-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;

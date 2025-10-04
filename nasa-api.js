@@ -1,16 +1,16 @@
-// nasa-api.js - Servicios para APIs NASA (VERSIÓN HÍBRIDA ROBUSTA)
+// nasa-api.js - NASA API Services (ROBUST HYBRID VERSION)
 
 class NasaApiService {
     constructor() {
-        // Manejo más robusto de API Key
+        // More robust API Key handling
         this.apiKey = this.getApiKey();
         this.cache = new Map();
-        this.cacheDuration = 1000 * 60 * 30; // 30 minutos
-        console.log('🔧 NasaApiService inicializado');
+        this.cacheDuration = 1000 * 60 * 30; // 30 minutes
+        console.log('🔧 NasaApiService initialized');
     }
 
     /**
-     * Obtener API Key de forma segura
+     * Get API Key safely
      */
     getApiKey() {
         if (typeof NASA_API_KEY !== 'undefined' && NASA_API_KEY !== 'DEMO_KEY') {
@@ -23,7 +23,7 @@ class NasaApiService {
     }
 
     /**
-     * Obtener eventos climáticos en tiempo real de EONET
+     * Get real-time climate events from EONET
      */
     async getClimateEvents(limit = 5) {
         const cacheKey = `climate_events_${limit}`;
@@ -35,7 +35,7 @@ class NasaApiService {
         }
 
         try {
-            console.log('📡 Obteniendo eventos climáticos en tiempo real de NASA...');
+            console.log('📡 Getting real-time climate events from NASA...');
             
             const response = await fetch(
                 `https://eonet.gsfc.nasa.gov/api/v3/events?limit=${limit}&days=30&category=severeStorms,floods,seaLakeIce,wildfires`
@@ -57,22 +57,22 @@ class NasaApiService {
                 
                 return {
                     id: event.id,
-                    title: event.title || 'Evento sin título',
+                    title: event.title || 'Untitled Event',
                     date: latestGeometry ? new Date(latestGeometry.date) : new Date(),
                     type: category?.title || 'Unknown',
                     coordinates: latestGeometry?.coordinates || [0, 0],
                     magnitude: this.calculateEventMagnitude(event),
                     source: 'NASA EONET',
-                    description: event.description || 'Evento climático en tiempo real'
+                    description: event.description || 'Real-time climate event'
                 };
             }).filter(event => event.magnitude > 0.3);
 
             this.setCache(cacheKey, processedEvents);
-            console.log(`✅ ${processedEvents.length} eventos climáticos cargados`);
+            console.log(`✅ ${processedEvents.length} climate events loaded`);
             return processedEvents;
             
         } catch (error) {
-            console.warn('❌ No se pudieron cargar eventos EONET, usando datos de respaldo:', error.message);
+            console.warn('❌ Could not load EONET events, using fallback data:', error.message);
             const fallbackEvents = this.getFallbackEvents(limit);
             this.setCache(cacheKey, fallbackEvents);
             return fallbackEvents;
@@ -80,24 +80,24 @@ class NasaApiService {
     }
 
     /**
-     * Calcular magnitud del evento (versión simplificada y segura)
+     * Calculate event magnitude (simplified and safe version)
      */
     calculateEventMagnitude(event) {
         if (!event) return 0.5;
         
         let magnitude = 0.5; // Base
         
-        // Ajustar por categoría de forma segura
+        // Adjust by category safely
         const categoryId = event.categories?.[0]?.id;
         if (categoryId === 'severeStorms') magnitude += 0.3;
         else if (categoryId === 'floods') magnitude += 0.4;
         else if (categoryId === 'wildfires') magnitude += 0.2;
         
-        return Math.min(1.0, Math.max(0.1, magnitude)); // Entre 0.1 y 1.0
+        return Math.min(1.0, Math.max(0.1, magnitude)); // Between 0.1 and 1.0
     }
 
     /**
-     * Obtener datos de nivel del mar en tiempo real
+     * Get real-time sea level data
      */
     async getSeaLevelData() {
         const cacheKey = 'sea_level_data';
@@ -108,7 +108,7 @@ class NasaApiService {
         }
 
         try {
-            console.log('📡 Obteniendo datos de nivel del mar de NASA...');
+            console.log('📡 Getting sea level data from NASA...');
             
             const currentYear = new Date().getFullYear();
             const baseYear = 1993;
@@ -127,11 +127,11 @@ class NasaApiService {
             };
 
             this.setCache(cacheKey, seaLevelData);
-            console.log('✅ Datos de nivel del mar cargados');
+            console.log('✅ Sea level data loaded');
             return seaLevelData;
             
         } catch (error) {
-            console.warn('❌ Error obteniendo datos de nivel del mar:', error.message);
+            console.warn('❌ Error getting sea level data:', error.message);
             const fallbackData = this.getFallbackSeaLevelData();
             this.setCache(cacheKey, fallbackData);
             return fallbackData;
@@ -139,7 +139,7 @@ class NasaApiService {
     }
 
     /**
-     * Obtener datos de temperatura global
+     * Get global temperature data
      */
     async getGlobalTemperature() {
         try {
@@ -150,18 +150,18 @@ class NasaApiService {
                 lastUpdated: new Date().toISOString()
             };
         } catch (error) {
-            console.warn('Error obteniendo datos de temperatura:', error.message);
+            console.warn('Error getting temperature data:', error.message);
             return {
                 anomaly: 1.1,
                 trend: 0.02,
-                source: 'Datos de respaldo',
+                source: 'Fallback Data',
                 lastUpdated: new Date().toISOString()
             };
         }
     }
 
     /**
-     * Obtener datos de CO2 atmosférico
+     * Get atmospheric CO2 data
      */
     async getCO2Data() {
         try {
@@ -172,10 +172,10 @@ class NasaApiService {
                 lastUpdated: new Date().toISOString()
             };
         } catch (error) {
-            console.warn('Error obteniendo datos de CO2:', error.message);
+            console.warn('Error getting CO2 data:', error.message);
             return {
                 co2Level: 420,
-                source: 'Datos de respaldo',
+                source: 'Fallback Data',
                 trend: 2.5,
                 lastUpdated: new Date().toISOString()
             };
@@ -217,24 +217,24 @@ class NasaApiService {
     }
 
     /**
-     * Eventos de fallback
+     * Fallback events
      */
     getFallbackEvents(limit = 5) {
         const currentDate = new Date();
         return [
             {
                 id: 'fallback_1',
-                title: "Aumento del Nivel del Mar - Tendencia Global",
+                title: "Sea Level Rise - Global Trend",
                 date: currentDate,
                 type: "Sea Level",
                 coordinates: [0, 0],
                 magnitude: 0.8,
                 source: "NASA Satellite Data",
-                description: "Tendencia observada por satélites NASA desde 1993"
+                description: "Trend observed by NASA satellites since 1993"
             },
             {
                 id: 'fallback_2',
-                title: "Eventos de Clima Extremo",
+                title: "Extreme Weather Events",
                 date: new Date(currentDate - 2 * 24 * 60 * 60 * 1000),
                 type: "Severe Storms",
                 coordinates: [-75, 40],
@@ -249,7 +249,7 @@ class NasaApiService {
             currentRise: 0.08,
             trend: 3.4,
             confidence: 'medium',
-            source: 'NASA Jason-3 (Datos de Respaldo)',
+            source: 'NASA Jason-3 (Fallback Data)',
             lastUpdated: new Date().toISOString()
         };
     }
@@ -260,22 +260,22 @@ let nasaService;
 
 try {
     nasaService = new NasaApiService();
-    console.log('🚀 Servicio NASA inicializado correctamente');
+    console.log('🚀 NASA Service initialized correctly');
 } catch (error) {
-    console.error('❌ Error creando NasaApiService, usando fallback completo:', error);
+    console.error('❌ Error creating NasaApiService, using complete fallback:', error);
     
-    // FALLBACK COMPLETO con TODAS las funciones necesarias
+    // COMPLETE FALLBACK with ALL necessary functions
     nasaService = {
         getClimateEvents: (limit = 5) => Promise.resolve([
             {
                 id: 'fallback_1',
-                title: "Datos de Respaldo - Cambio Climático Global",
+                title: "Fallback Data - Global Climate Change",
                 date: new Date(),
                 type: "Climate Change",
                 coordinates: [0, 0],
                 magnitude: 0.7,
-                source: "Sistema de Respaldo",
-                description: "Datos de respaldo del sistema"
+                source: "Fallback System",
+                description: "System fallback data"
             }
         ].slice(0, limit)),
         
@@ -309,16 +309,16 @@ try {
     };
 }
 
-// Asegurar que esté disponible globalmente
+// Ensure it's globally available
 window.nasaService = nasaService;
 
-// También exportar para uso en otros módulos si es necesario
+// Also export for use in other modules if necessary
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = nasaService;
 }
-// Función global para refrescar datos NASA y actualizar la UI del juego
+// Global function to refresh NASA data and update game UI
 window.refreshNasaData = async function () {
-    console.log("🔄 Refrescando datos NASA...");
+    console.log("🔄 Refreshing NASA data...");
 
     try {
         const [events, seaLevel, temp, co2] = await Promise.all([
@@ -328,12 +328,12 @@ window.refreshNasaData = async function () {
             nasaService.getCO2Data()
         ]);
 
-        console.log("✅ Datos NASA recibidos:", { events, seaLevel, temp, co2 });
+        console.log("✅ NASA data received:", { events, seaLevel, temp, co2 });
 
-        // 🔧 Aquí actualizamos la UI con los nuevos datos
+        // 🔧 Here we update the UI with the new data
         updateNasaUI({ events, seaLevel, temp, co2 });
 
     } catch (error) {
-        console.error("❌ Error refrescando datos NASA:", error);
+        console.error("❌ Error refreshing NASA data:", error);
     }
 };

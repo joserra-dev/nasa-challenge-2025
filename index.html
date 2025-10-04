@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,69 +11,69 @@
         <header>
             <h1>🌊 Costal Savior</h1>
             <div id="resources">
-                <span>💰 Presupuesto: <span id="money" class="resource-value">100</span></span>
-                <span>😊 Bienestar: <span id="wellbeing" class="resource-value">50</span></span>
-                <span>🌿 Ambiente: <span id="environment" class="resource-value">50</span></span>
-                <span>🛡️ Resiliencia: <span id="resilience" class="resource-value">20</span></span>
-                <span>📅 Año: <span id="year" class="resource-value">2025</span></span>
+                <span>💰 Budget: <span id="money" class="resource-value">100</span></span>
+                <span>😊 Wellbeing: <span id="wellbeing" class="resource-value">50</span></span>
+                <span>🌿 Environment: <span id="environment" class="resource-value">50</span></span>
+                <span>🛡️ Resilience: <span id="resilience" class="resource-value">20</span></span>
+                <span>📅 Year: <span id="year" class="resource-value">2025</span></span>
             </div>
         </header>
 
         <main>
             <div id="game-board">
-                <!-- Tablero generado dinámicamente -->
+                <!-- Board generated dynamically -->
             </div>
 
             <div id="control-panel">
-                <h3>Acciones</h3>
+                <h3>Actions</h3>
                 <div class="action-buttons">
-                    <button onclick="buildStructure('residential')">🏠 Zona Residencial (+Bienestar, -Ambiente)</button>
-                    <button onclick="buildStructure('industrial')">🏭 Zona Industrial (+Dinero, -Ambiente)</button>
-                    <button onclick="buildStructure('mangrove')">🟢 Restaurar Manglar (+Ambiente, +Resiliencia)</button>
-                    <button onclick="buildStructure('seawall')">🛡️ Construir Dique (+Resiliencia, -Dinero)</button>
-                    <button id="consult-ai-btn">📡 Consultar IA</button>
+                    <button onclick="buildStructure('residential')">🏠 Residential Zone (+Wellbeing, -Environment)</button>
+                    <button onclick="buildStructure('industrial')">🏭 Industrial Zone (+Money, -Environment)</button>
+                    <button onclick="buildStructure('mangrove')">🟢 Restore Mangrove (+Environment, +Resilience)</button>
+                    <button onclick="buildStructure('seawall')">🛡️ Build Seawall (+Resilience, -Money)</button>
+                    <button id="consult-ai-btn">📡 Consult AI</button>
 
                 </div>
                 
                 <div class="save-controls">
-                    <button onclick="manualSave()">💾 Guardar</button>
-                    <button onclick="manualLoad()">📂 Cargar</button>
-                    <button onclick="newGame()">🔄 Nuevo Juego</button>
-                    <button onclick="viewStats()">📊 Estadísticas</button>
+                    <button onclick="manualSave()">💾 Save</button>
+                    <button onclick="manualLoad()">📂 Load</button>
+                    <button onclick="newGame()">🔄 New Game</button>
+                    <button onclick="viewStats()">📊 Statistics</button>
                 </div>
 
-                <button id="next-turn-btn" onclick="nextTurn()">Siguiente Turno (5 años)</button>
+                <button id="next-turn-btn" onclick="nextTurn()">Next Turn (5 years)</button>
 
-                <!-- Panel NASA -->
+                <!-- NASA Panel -->
                 <div id="nasa-data-panel" class="nasa-data-update">
-                    <!-- Se llenará dinámicamente desde JS -->
+                    <!-- Will be filled dynamically from JS -->
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal de eventos -->
+    <!-- Event Modal -->
     <div id="event-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 id="event-title">Evento Climático</h2>
+            <h2 id="event-title">Climate Event</h2>
             <p id="event-description"></p>
-            <button onclick="closeEventModal()">Continuar</button>
+            <button onclick="closeEventModal()">Continue</button>
         </div>
     </div>
 
-    <!-- Modal de estadísticas -->
+    <!-- Statistics Modal -->
     <div id="stats-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>📊 Estadísticas de Partidas</h2>
+            <h2>📊 Game Statistics</h2>
             <div id="stats-content">
-                <!-- Contenido dinámico -->
+                <!-- Dynamic content -->
             </div>
             <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                <button onclick="closeStatsModal()">Cerrar</button>
-                <button onclick="exportSave()">📤 Exportar Partida</button>
+                <button onclick="closeStatsModal()">Close</button>
+                <button onclick="exportSave()">📤 Export Game</button>
                 
                 <input type="file" id="import-file" accept=".json" style="display: none;">
-                <button onclick="document.getElementById('import-file').click()">📥 Importar Partida</button>
+                <button onclick="document.getElementById('import-file').click()">📥 Import Game</button>
             </div>
         </div>
     </div>
@@ -86,7 +86,7 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Importar partidas
+            // Import games
             const importFile = document.getElementById('import-file');
             if (importFile) {
                 importFile.addEventListener('change', function(e) {
@@ -96,7 +96,7 @@
                 });
             }
 
-            // Animación inicial de NASA
+            // Initial NASA animation
             const nasaPanel = document.getElementById('nasa-data-panel');
             if (nasaPanel) {
                 nasaPanel.classList.add('nasa-data-update');
@@ -110,27 +110,27 @@
     </script>
 
 
-    Modal para IA
+    AI Modal
     <div id="ai-modal" class="modal hidden">
     <div class="modal-content ai-modal">
-        <h2>Asesor de IA Climática</h2>
+        <h2>Climate AI Advisor</h2>
         <div id="ai-response">
-        <p>La IA analizará tu estado actual del juego y los datos de NASA para recomendarte la mejor estrategia.</p>
+        <p>The AI will analyze your current game state and NASA data to recommend the best strategy.</p>
         </div>
-        <button onclick="closeAIModal()">Cerrar</button>
+        <button onclick="closeAIModal()">Close</button>
     </div>
 </div>
 <!-- API Config Modal -->
 <div id="api-config-modal" class="modal hidden" style="z-index:9999;">
   <div class="modal-content" style="max-width:520px;padding:16px;background:white;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);margin:6% auto;">
-    <h3>Configurar Servicio de IA</h3>
-    <p>Elige el proveedor y pega tu API Key. <strong>No compartas tu clave públicamente.</strong></p>
+    <h3>Configure AI Service</h3>
+    <p>Choose the provider and paste your API Key. <strong>Do not share your key publicly.</strong></p>
 
-    <label for="api-provider">Proveedor</label>
+    <label for="api-provider">Provider</label>
     <select id="api-provider" style="width:100%;margin-bottom:8px;padding:8px;">
       <option value="gemini">Gemini (Google)</option>
       <option value="openai">OpenAI</option>
-      <option value="other">Otro</option>
+      <option value="other">Other</option>
     </select>
 
     <label for="api-key">API Key</label>
@@ -138,16 +138,16 @@
 
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
       <input id="api-remember" type="checkbox" />
-      <label for="api-remember">Recordarme en este dispositivo (persistente)</label>
+      <label for="api-remember">Remember me on this device (persistent)</label>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button id="api-cancel-btn" class="btn">Cancelar</button>
-      <button id="api-save-btn" class="btn primary">Guardar y Consultar</button>
+      <button id="api-cancel-btn" class="btn">Cancel</button>
+      <button id="api-save-btn" class="btn primary">Save and Consult</button>
     </div>
 
     <small style="display:block;margin-top:8px;color:#666;">
-      Nota: Guardar la clave en el navegador implica riesgos. Para producción, gestiona las claves en un backend seguro.
+      Note: Saving the key in the browser involves risks. For production, manage keys in a secure backend.
     </small>
   </div>
 </div>
