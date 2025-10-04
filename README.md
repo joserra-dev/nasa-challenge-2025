@@ -286,7 +286,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Team**: Coastal Savior Development Team  
+**Team**: Coastal Savior Development Team 
+- Yara
+- [Joserra Dev](https://github.com/joserra-dev)
+- [Luis Sanchez](https://github.com/luanch96)
+- [Xabier Matute](https://github.com/XabierMatute)
 **Linkedin**: https://www.linkedin.com/in/luis-federico-s%C3%A1nchez/
 **NASA Space Apps**: [Challenge Submission Page](https://www.spaceappschallenge.org/2025/find-a-team/star-field/)  
 
