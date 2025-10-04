@@ -104,11 +104,13 @@
         });
     </script>
     <script>
-        const OPENAI_API_KEY = "tu_api_key_aqui"; // ⚠️ solo para pruebas locales
+        // const OPENAI_API_KEY = "tu_api_key_aqui"; // ⚠️ solo para pruebas locales
+		// const GEMINI_API_KEY = "AIzaSyCy62WY0Far__223dj5AlPQagGTMihFoYQ"; // ⚠️ solo para pruebas locales
+
     </script>
 
 
-    <!-- Modal para IA -->
+    Modal para IA
     <div id="ai-modal" class="modal hidden">
     <div class="modal-content ai-modal">
         <h2>Asesor de IA Climática</h2>
@@ -117,6 +119,37 @@
         </div>
         <button onclick="closeAIModal()">Cerrar</button>
     </div>
+</div>
+<!-- API Config Modal -->
+<div id="api-config-modal" class="modal hidden" style="z-index:9999;">
+  <div class="modal-content" style="max-width:520px;padding:16px;background:white;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);margin:6% auto;">
+    <h3>Configurar Servicio de IA</h3>
+    <p>Elige el proveedor y pega tu API Key. <strong>No compartas tu clave públicamente.</strong></p>
+
+    <label for="api-provider">Proveedor</label>
+    <select id="api-provider" style="width:100%;margin-bottom:8px;padding:8px;">
+      <option value="gemini">Gemini (Google)</option>
+      <option value="openai">OpenAI</option>
+      <option value="other">Otro</option>
+    </select>
+
+    <label for="api-key">API Key</label>
+    <input id="api-key" type="text" placeholder="sk-..." style="width:100%;padding:8px;margin-bottom:8px;" />
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <input id="api-remember" type="checkbox" />
+      <label for="api-remember">Recordarme en este dispositivo (persistente)</label>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="api-cancel-btn" class="btn">Cancelar</button>
+      <button id="api-save-btn" class="btn primary">Guardar y Consultar</button>
+    </div>
+
+    <small style="display:block;margin-top:8px;color:#666;">
+      Nota: Guardar la clave en el navegador implica riesgos. Para producción, gestiona las claves en un backend seguro.
+    </small>
+  </div>
 </div>
 
 
