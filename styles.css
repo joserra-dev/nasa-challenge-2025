@@ -229,6 +229,12 @@ main {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+
+.modal.hidden { display: none; }
+.modal { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; }
+.btn { padding: 8px 12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; }
+.btn.primary { background:#1d72f3;color:#fff;border-color:transparent; }
+
 /* === PANEL NASA === */
 #nasa-data-panel {
     background: linear-gradient(135deg, #0b3d91, #1a5f9e);

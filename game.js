@@ -955,82 +955,242 @@ function setupEventListeners() {
     });
 }
 
-// Consultar IA
+// ====== Gestión de configuración de API en navegador ======
+
+const API_CONFIG_KEY = 'game_ai_api_config';
+
+/**
+ * Muestra el modal de configuración
+ */
+function showApiConfigModal() {
+    const modal = document.getElementById('api-config-modal');
+    if (!modal) return;
+
+    // Cargar valores guardados si existen
+    const cfg = loadApiConfig();
+    if (cfg) {
+        document.getElementById('api-provider').value = cfg.provider || 'gemini';
+        document.getElementById('api-key').value = cfg.apiKey || '';
+        document.getElementById('api-remember').checked = !!cfg.persistent;
+    } else {
+        document.getElementById('api-provider').value = 'gemini';
+        document.getElementById('api-key').value = '';
+        document.getElementById('api-remember').checked = false;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+/**
+ * Guarda la configuración en sessionStorage o localStorage
+ */
+function saveApiConfig({ provider, apiKey, persistent }) {
+    const cfg = { provider, apiKey, persistent: !!persistent, savedAt: new Date().toISOString() };
+
+    try {
+        // Guardar en sessionStorage siempre (para uso inmediato)
+        sessionStorage.setItem(API_CONFIG_KEY, JSON.stringify(cfg));
+        // Si quiere persistir, guardar también en localStorage
+        if (persistent) {
+            localStorage.setItem(API_CONFIG_KEY, JSON.stringify(cfg));
+        } else {
+            localStorage.removeItem(API_CONFIG_KEY);
+        }
+        return true;
+    } catch (err) {
+        console.error('Error guardando configuración de API:', err);
+        return false;
+    }
+}
+
+/**
+ * Carga la configuración (prefiere localStorage si existe, luego sessionStorage)
+ */
+function loadApiConfig() {
+    try {
+        const persistent = localStorage.getItem(API_CONFIG_KEY);
+        if (persistent) return JSON.parse(persistent);
+
+        const session = sessionStorage.getItem(API_CONFIG_KEY);
+        if (session) return JSON.parse(session);
+
+        return null;
+    } catch (err) {
+        console.error('Error cargando configuración de API:', err);
+        return null;
+    }
+}
+
+/**
+ * Cierra modal y limpia inputs si queremos
+ */
+function closeApiConfigModal() {
+    const modal = document.getElementById('api-config-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+}
+
+// Inicializar eventos del modal
+function initApiConfigUI() {
+    const saveBtn = document.getElementById('api-save-btn');
+    const cancelBtn = document.getElementById('api-cancel-btn');
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', (e) => {
+            const provider = document.getElementById('api-provider').value;
+            const apiKey = document.getElementById('api-key').value.trim();
+            const persistent = document.getElementById('api-remember').checked;
+
+            if (!apiKey) {
+                alert('Introduce tu API Key antes de guardar.');
+                return;
+            }
+
+            saveApiConfig({ provider, apiKey, persistent });
+            closeApiConfigModal();
+
+            // Llamar a consultAI inmediatamente después de guardar
+            consultAI();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', (e) => {
+            closeApiConfigModal();
+        });
+    }
+
+    // Cerrar modal al hacer click fuera del contenido
+    const modal = document.getElementById('api-config-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeApiConfigModal();
+        });
+    }
+}
+
+// Llamar en el DOMContentLoaded para enlazar UI
+document.addEventListener('DOMContentLoaded', () => {
+    initApiConfigUI();
+});
+
+// ====== Consultar IA usando la configuración dinámica ======
 async function consultAI() {
+    // Leer config
+    const cfg = loadApiConfig();
+
+    // Si no hay config, pedirla al usuario
+    if (!cfg || !cfg.apiKey) {
+        showApiConfigModal();
+        return;
+    }
+
+    const provider = cfg.provider;
+    const apiKey = cfg.apiKey;
+
+    // Construir prompt a partir del estado del juego
     const state = {
         turno: gameState.turn,
-        recursos: gameState.resources,
-        resiliencia: gameState.resilience,
+        dinero: gameState.money,
         bienestar: gameState.wellbeing,
+        medioAmbiente: gameState.environment,
+        resiliencia: gameState.resilience,
         nasa: gameState.nasaData
     };
 
-    // Prompt básico (esto luego se conecta con la IA real)
     const aiPrompt = `
-        Estado actual del juego:
-        - Turno: ${state.turno}
-        - Recursos: ${JSON.stringify(state.recursos)}
-        - Resiliencia: ${state.resiliencia}
-        - Bienestar: ${state.bienestar}
-        - Datos NASA: ${JSON.stringify(state.nasa)}
+Estado actual del juego:
+- Turno: ${state.turno}
+- Dinero: ${state.dinero}
+- Bienestar: ${state.bienestar}
+- Medio Ambiente: ${state.medioAmbiente}
+- Resiliencia: ${state.resiliencia}
+- Datos NASA: ${JSON.stringify(state.nasa)}
 
-        Actúa como un asesor experto en gestión climática y urbanística.
-        Da una recomendación clara y estructurada de qué acciones
-        debería tomar el jugador para sobrevivir y proteger la costa.
-    `;
+Actúa como un asesor experto en gestión climática y urbanística.
+Da una recomendación clara y práctica de qué acciones debería tomar el jugador para proteger la costa y sobrevivir.
+`.trim();
 
-    // 🔮 Aquí llamarías a la IA real (API de OpenAI u otro motor).
-    // Por ahora simulamos la respuesta:
-   /*  const fakeAIResponse = `
-        📊 Análisis de la IA:
-        - Los niveles del mar están aumentando de forma acelerada.
-        - Tu resiliencia actual (${state.resiliencia}) es insuficiente.
-        - Prioriza la construcción de diques y manglares en las zonas costeras.
-        - Invierte recursos en reducir la contaminación para frenar futuros eventos.
-
-        ✅ Recomendación: dedica los próximos 2 turnos a reforzar la costa
-        antes de expandir otras infraestructuras.
-    `; */
-
- /*    document.getElementById("ai-response").innerHTML = `<pre>${fakeAIResponse}</pre>`;
-    document.getElementById("ai-modal").classList.remove("hidden"); */
-
-        // Mostrar mensaje de carga
-    document.getElementById("ai-response").innerHTML = `<p>🔄 Consultando a la IA...</p>`;
-    document.getElementById("ai-modal").classList.remove("hidden");
+    // Mostrar modal de IA (carga)
+    const aiResponseEl = document.getElementById("ai-response");
+    if (aiResponseEl) {
+        aiResponseEl.innerHTML = `<p>🔄 Consultando a ${provider.toUpperCase()}...</p>`;
+        document.getElementById("ai-modal").classList.remove("hidden");
+    }
 
     try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${OPENAI_API_KEY}` // Necesitas definir esta variable en tu entorno
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    { role: "system", content: "Eres un asesor climático experto en resiliencia costera." },
-                    { role: "user", content: aiPrompt }
-                ],
-                temperature: 0.7
-            })
-        });
+        let aiText = '';
 
-        const data = await response.json();
-        if (data.error) {
-            throw new Error(data.error.message);
+        if (provider === 'gemini') {
+            // Gemini (ejemplo con gemini-2.5-flash-lite)
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+
+            const resp = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    // estructura básica; puedes personalizar safetySettings, temperature, etc.
+                    contents: [
+                        { role: "user", parts: [{ text: aiPrompt }] }
+                    ]
+                })
+            });
+
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error.message || JSON.stringify(data));
+            aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Gemini no devolvió respuesta.";
+
+        } else if (provider === 'openai') {
+            // OpenAI (si alguien quiere usarla) - ejemplo con Chat Completions
+            const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        { role: "system", content: "Eres un asesor climático experto." },
+                        { role: "user", content: aiPrompt }
+                    ],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error.message || JSON.stringify(data));
+            aiText = data.choices?.[0]?.message?.content || "⚠️ OpenAI no devolvió respuesta.";
+
+        } else {
+            // Otro: intentar una POST genérica si el usuario desea (esto es una plantilla)
+            throw new Error("Proveedor no soportado en esta versión. Usa Gemini u OpenAI.");
         }
 
-        const aiText = data.choices[0].message.content;
+        // Mostrar respuesta
+        if (aiResponseEl) {
+            aiResponseEl.innerHTML = `<pre style="white-space:pre-wrap;">${escapeHtml(aiText)}</pre>`;
+        }
 
-        document.getElementById("ai-response").innerHTML = `<pre>${aiText}</pre>`;
     } catch (error) {
         console.error("Error al consultar la IA:", error);
-        document.getElementById("ai-response").innerHTML = `
-            <p style="color:red;">❌ Error al consultar la IA:<br>${error.message}</p>
-        `;
+        if (aiResponseEl) {
+            aiResponseEl.innerHTML = `<p style="color:red;">❌ Error al consultar la IA:<br>${escapeHtml(error.message || String(error))}</p>`;
+        }
     }
 }
+
+/** Helper para escapar HTML y evitar inyección si mostramos texto */
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
 
 function closeAIModal() {
     document.getElementById("ai-modal").classList.add("hidden");
