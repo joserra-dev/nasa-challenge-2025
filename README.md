@@ -288,7 +288,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Team**: Coastal Savior Development Team  
 **Email**: [your-email@example.com]  
-**NASA Space Apps**: [[Challenge Submission Page]](https://www.spaceappschallenge.org/2025/find-a-team/star-field/)  
+**NASA Space Apps**: [Challenge Submission Page](https://www.spaceappschallenge.org/2025/find-a-team/star-field/)  
 
 ---
 
